@@ -1,20 +1,21 @@
 import requests
-import pickle
-import matplotlib.pyplot as plot
-import pandas
 import math
+import time
 
 
-def get_question_page_list_from_tag(string_tag):
+def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
     """
     Gets all question pages by tag
 
     :param string_tag: string representing a SO tag ex. "azure-machine-learning
+    :param max_backoff_wait_time_sec: total maximum time in seconds user wishes to wait for backoff, if this time is
+           reached, the function will stop polling the API and return the result set it has thus far
     :return: returns a list of pages, use this return as a param to get_question_list_from_pages()
     """
 
     question_page_list = []
     has_more = True
+    accumulated_backoff_time_sec = 0
     page = 1
 
     base_url = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&site=stackoverflow" \
@@ -24,6 +25,19 @@ def get_question_page_list_from_tag(string_tag):
         response = requests.get(base_url + "&page=" + str(page))
         response_dict = response.json()
         question_page_list.append(response_dict["items"])
+
+        # check if response has a backoff param, if so check against max desired wait time and either pause thread
+        # or quit polling
+        try:
+            backoff = response_dict["backoff"]
+            accumulated_backoff_time_sec = accumulated_backoff_time_sec + backoff
+
+            if accumulated_backoff_time_sec < max_backoff_wait_time_sec:
+                time.sleep(backoff)
+            else:
+                has_more = False
+        except:
+            pass
 
         # the "has_more" parameter in the response object indicates there are more pages
         query_has_more_pages = response_dict["has_more"]
@@ -53,15 +67,15 @@ def get_question_list_from_pages(question_page_list):
 
 def build_user_groups_for_batching(question_list):
     """
-    Builds unique user_id list from questions, puts users into groups of 80 to avoid excessive API requests,
+    Builds unique user_id list from questions, puts users into groups of 80 to avoid excessive API requests, which I
+    have been known to do.
 
     :param question_list: return val from get_question_list_from_pages
     :return: list of group lists
     """
 
-    user_id_list = []
-
     # build unique user id list
+    user_id_list = []
     for question in question_list:
 
         try:
@@ -93,7 +107,7 @@ def build_user_groups_for_batching(question_list):
     return list_of_group_lists
 
 
-def build_users_top_tags_freq_matrix(user_group_list):
+def build_users_top_tags_freq_matrix(user_group_list, max_backoff_wait_time_sec):
     """
     Takes user groups and hits the API for each user's top profile tags. This allows you to see, independent
     of the tag you searched for to fetch the question_list, what other tags do they work with.
@@ -103,6 +117,7 @@ def build_users_top_tags_freq_matrix(user_group_list):
     :return: dict (map of unique tag, and total question/answer count for that tag
     """
 
+    accumulated_backoff_time_sec = 0
     tag_freq_map = {}
     # for each user group, fetch their top used tags and add to map
     for user_group in user_group_list:
@@ -130,63 +145,70 @@ def build_users_top_tags_freq_matrix(user_group_list):
                 incremented_freq = current_freq + total_questions_and_answers
                 tag_freq_map[tag_name] = incremented_freq
 
+        # check if response has a backoff param, if so check against max desired wait time and either pause thread
+        # or quit polling
+        try:
+            backoff = response_dict["backoff"]
+            accumulated_backoff_time_sec = accumulated_backoff_time_sec + backoff
+
+            if accumulated_backoff_time_sec < max_backoff_wait_time_sec:
+                time.sleep(backoff)
+            else:
+                break
+        except:
+            pass
+
     return tag_freq_map
 
 
+def get_rep_distribution_from_question_list(question_list):
 
+    rep_list = []
+    for question in question_list:
 
-
-
-# list_to_pickle = get_question_list_from_tag("azure-machine-learning")
-# pprint(list_to_pickle)
-# pickle.dump(list_to_pickle, open("C:\\Users\\trbye\\python_pickles\\azure-ml-questions.pkl", "wb"))
-
-
-ml_question_pages = pickle.load(open("C:\\Users\\trbye\\python_pickles\\azure-ml-questions.pkl", "rb"))
-question_list = get_question_list_from_pages(ml_question_pages)
-user_group_list = build_user_groups_for_batching(question_list)
-tag_freq_matrix = build_users_top_tags_freq_matrix(user_group_list)
-
-
-# cs_question_pages = get_question_page_list_from_tag("azure-cognitive-services")
-# pickle.dump(cs_question_pages, open("C:\\Users\\trbye\\python_pickles\\azure-cs-questions.pkl", "wb"))
-
-cs_question_pages = pickle.load(open("C:\\Users\\trbye\\python_pickles\\azure-cs-questions.pkl", "rb"))
-cs_question_list = get_question_list_from_pages(cs_question_pages)
-cs_user_group_list = build_user_groups_for_batching(cs_question_list)
-cs_tag_freq = build_users_top_tags_freq_matrix(cs_user_group_list)
-
-fig = plot.figure()
-ax1 = fig.add_subplot(1,2,1)
-ax2 = fig.add_subplot(1,2,2)
-
-df_ml = pandas.DataFrame.from_dict(tag_freq_matrix, orient="index")
-df_ml.columns = ["tag-count"]
-df_ml = df_ml.sort_values(by="tag-count", ascending=False)
-df_ml = df_ml.head(20)
-df_ml.plot(ax=ax1, kind="bar", title="azure-machine-learning")
-
-df_cs = pandas.DataFrame.from_dict(cs_tag_freq, orient="index")
-df_cs.columns = ["tag-count"]
-df_cs = df_cs.sort_values(by="tag-count", ascending=False)
-df_cs = df_cs.head(20)
-df_cs.plot(ax=ax2, kind="bar", title="azure-cognitive-services", color="red")
-
-plot.tight_layout()
-plot.show()
-
-
-# in the future, will need to account for multiple users posting more than one question. However,
-# it shouldn't affect the total histogram significantly for testing purposes
-rep_list = []
-for question in question_list:
-    try:
-        rep = question["owner"]["reputation"]
-
-        if rep <= 10000:
+        # if a user account no longer exists, "owner" object will not exist and throw exception
+        try:
+            rep = question["owner"]["reputation"]
             rep_list.append(rep)
-    except:
-        rep_list.append(0)
+        except:
+            pass
 
-plot.hist(rep_list, bins=50)
-plot.show()
+    return rep_list
+
+
+def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
+
+    has_more = True
+    accumulated_backoff_time_sec = 0
+    page = 1
+    base_url = "https://api.stackexchange.com/2.2/tags?order=desc&sort=popular&site=stackoverflow" \
+               "&pagesize=100" + "&inname=" + include_string
+
+    tag_count_dict = {}
+    while has_more:
+        response = requests.get(base_url + "&page=" + str(page))
+        response_dict = response.json()
+
+        tag_list = response_dict['items']
+        for tag_obj in tag_list:
+            tag_count_dict[tag_obj["name"]] = tag_obj["count"]
+
+        try:
+            backoff = response_dict["backoff"]
+            accumulated_backoff_time_sec = accumulated_backoff_time_sec + backoff
+
+            if accumulated_backoff_time_sec < max_backoff_wait_time_sec:
+                time.sleep(backoff)
+            else:
+                has_more = False
+        except:
+            pass
+
+        # the "has_more" parameter in the response object indicates there are more pages
+        query_has_more_pages = response_dict["has_more"]
+        if not query_has_more_pages:
+            has_more = False
+
+        page = page + 1
+
+    return tag_count_dict
