@@ -1,9 +1,21 @@
 import APIFetcher
 import matplotlib.pyplot as plot
 import pandas
+import csv
+import pickle
 
 ml_question_pages = APIFetcher.get_question_page_list_from_tag("azure-machine-learning", 300)
 question_list = APIFetcher.get_question_list_from_pages(ml_question_pages)
+comment_list = APIFetcher.get_comments_from_question_list(question_list)
+#pickle.dump(comment_list, open("list_comments.pkl", "wb"))
+question_bodies = APIFetcher.get_question_bodies(question_list)
+
+msdcos_urls = APIFetcher.extract_msdocs_uris_in_text(comment_list)
+xx_urls = APIFetcher.extract_msdocs_uris_in_text(question_bodies)
+
+
+
+
 user_group_list = APIFetcher.build_user_groups_for_batching(question_list)
 tag_freq_matrix = APIFetcher.build_users_top_tags_freq_matrix(user_group_list, 300)
 

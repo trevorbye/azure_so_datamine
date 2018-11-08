@@ -2,6 +2,8 @@ import requests
 import math
 import time
 
+api_key = "uTbSik2jd6UJmkIC3DguOg(("
+
 
 def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
     """
@@ -19,7 +21,7 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
     page = 1
 
     base_url = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&site=stackoverflow" \
-               "&tagged=" + string_tag + "&pagesize=100"
+               "&tagged=" + string_tag + "&filter=withbody" + "&pagesize=100&key=" + api_key
 
     while has_more:
         response = requests.get(base_url + "&page=" + str(page))
@@ -44,6 +46,10 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
         if not query_has_more_pages:
             has_more = False
 
+        # cut sample size at 50 pages (5000 entities) to avoid excessive API calls
+        if page >= 50:
+            break
+
         page = page + 1
 
     return question_page_list
@@ -65,44 +71,56 @@ def get_question_list_from_pages(question_page_list):
     return question_list
 
 
-def build_user_groups_for_batching(question_list):
+def get_question_bodies(question_list):
+    list_question_bodies = []
+
+    for question in question_list:
+        list_question_bodies.append(question["body"])
+
+    return list_question_bodies
+
+
+def build_id_groups_for_batching(question_list, id_type):
     """
-    Builds unique user_id list from questions, puts users into groups of 80 to avoid excessive API requests, which I
+    Builds unique id_list from questions, puts id's into groups of 80 to avoid excessive API requests, which I
     have been known to do.
 
     :param question_list: return val from get_question_list_from_pages
+    :param id_type: string name for id type, extracts different id from question object
     :return: list of group lists
     """
 
-    # build unique user id list
-    user_id_list = []
+    # build unique id list
+    id_list = []
     for question in question_list:
+        if id_type == "user_id":
+            try:
+                user_id = question["owner"]["user_id"]
+                if user_id not in id_list:
+                    id_list.append(user_id)
+            except:
+                pass
+        else:
+            id_list.append(question["question_id"])
 
-        try:
-            user_id = question["owner"]["user_id"]
-            if user_id not in user_id_list:
-                user_id_list.append(user_id)
-        except:
-            pass
-
-    # build unique users into groups to limit the amount of API requests
-    user_size = len(user_id_list)
+    # build unique id's into groups to limit the amount of API requests
+    id_list_size = len(id_list)
     num_groups = 0
 
-    if user_size <= 80:
+    if id_list_size <= 100:
         num_groups = 1
     else:
-        num_groups = math.ceil(user_size / 80)
+        num_groups = math.ceil(id_list_size / 100)
 
     list_of_group_lists = []
     index_start = 0
-    index_end = 79
+    index_end = 99
     for i in range(num_groups):
-        group_list = [x for x in user_id_list if index_start <= user_id_list.index(x) <= index_end]
+        group_list = [x for x in id_list if index_start <= id_list.index(x) <= index_end]
         list_of_group_lists.append(group_list)
 
-        index_start = index_start + 80
-        index_end = index_end + 80
+        index_start = index_start + 100
+        index_end = index_end + 100
 
     return list_of_group_lists
 
@@ -129,7 +147,8 @@ def build_users_top_tags_freq_matrix(user_group_list, max_backoff_wait_time_sec)
 
         chained_user_string = chained_user_string[:-1]
 
-        base_url = "https://api.stackexchange.com/2.2/users/" + chained_user_string + "/top-tags?site=stackoverflow"
+        base_url = "https://api.stackexchange.com/2.2/users/" + chained_user_string + "/top-tags?site=stackoverflow" \
+                   + "&key=" + api_key
         response = requests.get(base_url)
         response_dict = response.json()
         tag_entity_list = response_dict["items"]
@@ -182,7 +201,7 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
     accumulated_backoff_time_sec = 0
     page = 1
     base_url = "https://api.stackexchange.com/2.2/tags?order=desc&sort=popular&site=stackoverflow" \
-               "&pagesize=100" + "&inname=" + include_string
+               "&pagesize=100" + "&inname=" + include_string + "&key=" + api_key
 
     tag_count_dict = {}
     while has_more:
@@ -212,3 +231,68 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
         page = page + 1
 
     return tag_count_dict
+
+
+def get_comments_from_question_list(question_list):
+    question_id_group_list = build_id_groups_for_batching(question_list, "question_id")
+
+    all_comment_entities_list = []
+    for question_id_group in question_id_group_list:
+
+        # build chained user string for this user group
+        chained_id_string = ""
+        for question_id in question_id_group:
+            chained_id_string = chained_id_string + str(question_id) + ";"
+
+        chained_id_string = chained_id_string[:-1]
+
+        base_url = "https://api.stackexchange.com/2.2/questions/" + chained_id_string + "/comments?order=desc" \
+                   "&sort=creation&site=stackoverflow&filter=withbody&key=" + api_key
+        response = requests.get(base_url)
+        response_dict = response.json()
+
+        all_comment_entities_list.append(response_dict["items"])
+
+    comment_body_list = []
+    for group in all_comment_entities_list:
+        for comment_entity in group:
+            body = comment_entity["body"]
+            comment_body_list.append(body)
+
+    return comment_body_list
+
+
+def extract_msdocs_uris_in_text(list_of_documents):
+    """
+    Finds occurrences where someone linked to msdocs url path in a body of text. In case there are multiple msdocs uris
+    anchors in the text body, find them in order and remove the root uri as you find each one, and the loop will
+    continue grabbing them until there are none left
+
+    :param list_of_documents: list of strings
+    :return: list of dicts
+    """
+
+    root_test_string = "<a href=\"https://docs.microsoft.com"
+    msdocs_url_objects = []
+
+    # build list of msdocs urls
+    for doc in list_of_documents:
+        scan_for_uris = True
+
+        while scan_for_uris:
+            if root_test_string in doc:
+
+                # extract path, article desc, and rebuild full url
+                path = doc.split(root_test_string)[1].split("\"")[0]
+                article_desc = path.rpartition("/")[-1]
+                full_url = "https://docs.microsoft.com" + path
+
+                url_object = {"url": full_url, "article-desc": article_desc}
+                msdocs_url_objects.append(url_object)
+
+                # delete only first occurrence of root URI
+                doc = doc.replace(root_test_string, "", 1)
+            else:
+                break
+
+    return msdocs_url_objects
