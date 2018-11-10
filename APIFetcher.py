@@ -285,6 +285,10 @@ def extract_msdocs_uris_in_text(list_of_documents):
                 # extract path, article desc, and rebuild full url
                 path = doc.split(root_test_string)[1].split("\"")[0]
                 article_desc = path.rpartition("/")[-1]
+
+                if "#" in article_desc:
+                    article_desc = article_desc.split("#")[0]
+
                 full_url = "https://docs.microsoft.com" + path
 
                 url_object = {"url": full_url, "article-desc": article_desc}
@@ -296,3 +300,19 @@ def extract_msdocs_uris_in_text(list_of_documents):
                 break
 
     return msdocs_url_objects
+
+
+def build_msdcos_freq_matrix(list_of_msdcos_objects):
+    freq_matrix = {}
+
+    for msdoc_object in list_of_msdcos_objects:
+        article_desc = msdoc_object["article-desc"]
+
+        if article_desc in freq_matrix:
+            current_freq = freq_matrix[article_desc]
+            incremented_count = current_freq + 1
+            freq_matrix[article_desc] = incremented_count
+        else:
+            freq_matrix[article_desc] = 1
+
+    return freq_matrix
