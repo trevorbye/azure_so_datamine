@@ -1,6 +1,8 @@
 import requests
 import math
 import time
+import requests
+import UtilityMethods
 
 api_key = "uTbSik2jd6UJmkIC3DguOg(("
 
@@ -203,15 +205,22 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
     base_url = "https://api.stackexchange.com/2.2/tags?order=desc&sort=popular&site=stackoverflow" \
                "&pagesize=100" + "&inname=" + include_string + "&key=" + api_key
 
-    tag_count_dict = {}
+    tag_object_list = []
     while has_more:
         response = requests.get(base_url + "&page=" + str(page))
         response_dict = response.json()
 
         tag_list = response_dict['items']
+        tag_rank = 0
         for tag_obj in tag_list:
-            tag_count_dict[tag_obj["name"]] = tag_obj["count"]
+            # only build the top tag with this attribute
+            if page == 1 and tag_rank == 0:
+                new_obj = {"name": tag_obj["name"], "y": tag_obj["count"], "sliced": True, "selected": True}
+            else:
+                new_obj = {"name": tag_obj["name"], "y": tag_obj["count"]}
 
+            tag_object_list.append(new_obj)
+            tag_rank = tag_rank + 1
         try:
             backoff = response_dict["backoff"]
             accumulated_backoff_time_sec = accumulated_backoff_time_sec + backoff
@@ -230,7 +239,7 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
 
         page = page + 1
 
-    return tag_count_dict
+    return tag_object_list
 
 
 def get_comments_from_question_list(question_list):
@@ -316,3 +325,36 @@ def build_msdcos_freq_matrix(list_of_msdcos_objects):
             freq_matrix[article_desc] = 1
 
     return freq_matrix
+
+
+def key_phrase_extraction(list_of_docs):
+    base_url = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/keyPhrases"
+    subscription_key = "a3d9dbb3f8904b2cbc465bfa5b2284f4"
+
+    list_doc_dicts = []
+    id = 1
+    for doc in list_of_docs:
+        tmp_dict = {"id": id, "language": "en", "text": doc}
+        list_doc_dicts.append(tmp_dict)
+        id = id + 1
+
+    documents = {"documents": list_doc_dicts}
+    headers = {'Ocp-Apim-Subscription-Key': subscription_key}
+    response = requests.post(base_url, headers=headers, json=documents)
+    key_phrases = response.json()
+
+    list_aggregated_phrases = []
+    docs = key_phrases["documents"]
+
+    for doc in docs:
+        combined_string = ""
+        phrases = doc["keyPhrases"]
+        for phrase in phrases:
+            combined_string = combined_string + " " + phrase
+
+        duplicates_removed = UtilityMethods.remove_duplicates(combined_string)
+        list_aggregated_phrases.append(duplicates_removed)
+
+    return list_aggregated_phrases
+
+

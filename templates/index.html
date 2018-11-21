@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='main.css') }}">
+<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+      <a class="navbar-brand" href="#">Stack Overflow Datamine Interface</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+
+      </div>
+    </nav>
+
+    <main role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+          <h1 class="display-3">Understand your developers</h1>
+          <p>This interface mines data from Stack Overflow, in an effort to understand more about the community of developers that use different tags. </p>
+          <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+          <div class="col-md-4">
+            <h2>Tag Research</h2>
+            <p>Search for tags including specific text, and extract their relative usage on Stack Overflow.</p>
+            <p><a class="btn btn-secondary" href="/tags" role="button">View details &raquo;</a></p>
+          </div>
+          <div class="col-md-4">
+            <h2>Developer Insight</h2>
+            <p>Understand everything about the developers that use a specific tag. What tech stacks do they use, what is their experience level, and how they participate in the community.</p>
+            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+          </div>
+          <div class="col-md-4">
+            <h2>Text Mining Insights</h2>
+            <p>Extract text from questions/comments based on a tag, to gain insight on what questions are being asked, and what keywords are being used.</p>
+            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+          </div>
+        </div>
+
+        <hr>
+
+      </div> <!-- /container -->
+    </main>
+
+</body>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type = "text/javascript" src = "/static/bootstrap.min.js"></script>
+</html>

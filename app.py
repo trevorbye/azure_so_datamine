@@ -1,8 +1,16 @@
-from flask import Flask
-from flask import jsonify
-from flask import request
+from flask import Flask, jsonify, request, render_template, url_for
 import APIFetcher
 app = Flask(__name__)
+
+
+@app.route("/")
+def home_page():
+    return render_template("index.html", title="StackOverflow Datamine Interface")
+
+
+@app.route("/tags")
+def tag_page():
+    return render_template("tags.html", title="Tag Research")
 
 
 # /get-tags-from-string-contained?instring=azure&maxbackoffsec=200
