@@ -206,6 +206,7 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
                "&pagesize=100" + "&inname=" + include_string + "&key=" + api_key
 
     tag_object_list = []
+    tag_array_list = []
     while has_more:
         response = requests.get(base_url + "&page=" + str(page))
         response_dict = response.json()
@@ -216,9 +217,13 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
             # only build the top tag with this attribute
             if page == 1 and tag_rank == 0:
                 new_obj = {"name": tag_obj["name"], "y": tag_obj["count"], "sliced": True, "selected": True}
+
             else:
                 new_obj = {"name": tag_obj["name"], "y": tag_obj["count"]}
 
+            array_obj_for_table = [tag_obj["name"], tag_obj["count"]]
+
+            tag_array_list.append(array_obj_for_table)
             tag_object_list.append(new_obj)
             tag_rank = tag_rank + 1
         try:
@@ -239,7 +244,9 @@ def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
 
         page = page + 1
 
-    return tag_object_list
+    return_obj = {"chartData": tag_object_list, "tableData": tag_array_list}
+
+    return return_obj
 
 
 def get_comments_from_question_list(question_list):

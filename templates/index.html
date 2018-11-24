@@ -2,6 +2,8 @@
 <html lang="en">
 <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
 <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
 <meta name="viewport" content = "width=device-width, initial-scale=1.0">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +11,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+      <span><img class="logo" src="/static/so-icon.png" width="45" height="45"></span>
       <a class="navbar-brand" href="#">Stack Overflow Datamine Interface</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -31,22 +34,48 @@
       </div>
 
       <div class="container">
-        <!-- Example row of columns -->
         <div class="row">
           <div class="col-md-4">
-            <h2>Tag Research</h2>
+            <div class="text-center">
+              <i class="fa fa-tags fa-2x" aria-hidden="true" id="icon-1"></i>
+            </div>
+            <br>
+
+            <div class="text-center">
+              <h2>Tag Research</h2>
+            </div>
             <p>Search for tags including specific text, and extract their relative usage on Stack Overflow.</p>
-            <p><a class="btn btn-secondary" href="/tags" role="button">View details &raquo;</a></p>
+            <div class="text-center">
+              <p><a class="btn btn-secondary" href="/tags" role="button">View details &raquo;</a></p>
+            </div>
           </div>
           <div class="col-md-4">
-            <h2>Developer Insight</h2>
-            <p>Understand everything about the developers that use a specific tag. What tech stacks do they use, what is their experience level, and how they participate in the community.</p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
-          </div>
-          <div class="col-md-4">
-            <h2>Text Mining Insights</h2>
+            <div class="text-center">
+              <i class="fa fa-database fa-2x" aria-hidden="true" id="icon-3"></i>
+            </div>
+            <br>
+
+            <div class="text-center">
+              <h2>Text Mining and Parsing</h2>
+            </div>
             <p>Extract text from questions/comments based on a tag, to gain insight on what questions are being asked, and what keywords are being used.</p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+            <div class="text-center">
+              <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-center">
+              <i class="fa fa-code fa-2x" aria-hidden="true" id="icon-2"></i>
+            </div>
+            <br>
+
+            <div class="text-center">
+              <h2>Developer Insight</h2>
+            </div>
+            <p>Understand everything about the developers that use a specific tag. What tech stacks do they use, what is their experience level, and how they participate in the community.</p>
+            <div class="text-center">
+              <p><a class="btn btn-secondary" href="/devs" role="button">View details &raquo;</a></p>
+            </div>
           </div>
         </div>
 

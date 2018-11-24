@@ -6,10 +6,11 @@ import numpy as np
 import csv
 import pickle
 
-tag_list = APIFetcher.get_tag_list_where_includes("azure", 200)
-question_pages = APIFetcher.get_question_page_list_from_tag("javascript", 300)
+#tag_list = APIFetcher.get_tag_list_where_includes("azure-cognitive-services", 200)
+question_pages = APIFetcher.get_question_page_list_from_tag("azure-cognitive-services", 300)
 question_list = APIFetcher.get_question_list_from_pages(question_pages)
 
+"""
 # comment_bodies = APIFetcher.get_comments_from_question_list(question_list)
 question_bodies = APIFetcher.get_question_bodies(question_list)
 parsed_bodies = UtilityMethods.parse_paragraph_content_from_list_docs(question_bodies)
@@ -23,10 +24,13 @@ df_wordlist = df_wordlist.sort_values(by="Freq", ascending=False)
 
 semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(key_phrases)
 bp = "test"
+"""
 
 # pickle.dump(comment_bodies, open("ml_list_comments.pkl", "wb"))
 # pickle.dump(question_bodies, open("ml_list_questions.pkl", "wb"))
 # ml_question_bodies = pickle.load(open("ml_list_questions.pkl", "rb"))
+
+"""
 questions_msdocs_uris = APIFetcher.extract_msdocs_uris_in_text(question_bodies)
 msdocs_freq_matrix = APIFetcher.build_msdcos_freq_matrix(questions_msdocs_uris)
 
@@ -48,12 +52,11 @@ running_sum = 0
 for x in re_dist:
     running_sum = running_sum + x
 mean = (running_sum * 1.0) / len(re_dist)
+"""
 
-plot.hist(np.array(re_dist), bins=100, edgecolor="black", color="red")
-plot.title("ml.net Users Rep Distribution:  mean=" + str(round(mean, 2)) + ";  Global SO rep mean=109")
-plot.show()
-
-bp = ""
+#plot.hist(np.array(re_dist), bins=100, edgecolor="black", color="red")
+#plot.title("ml.net Users Rep Distribution:  mean=" + str(round(mean, 2)) + ";  Global SO rep mean=109")
+#plot.show()
 
 user_group_list = APIFetcher.build_id_groups_for_batching(question_list, "user_id")
 tag_freq_matrix = APIFetcher.build_users_top_tags_freq_matrix(user_group_list, 300)
@@ -62,9 +65,11 @@ fig = plot.figure()
 ax1 = fig.add_subplot(1,2,1)
 ax2 = fig.add_subplot(1,2,2)
 
-df_ml = pandas.DataFrame.from_dict(tag_freq_matrix, orient="index")
-df_ml.columns = ["tag-count"]
-df_ml = df_ml.sort_values(by="tag-count", ascending=False)
+df_ml = pandas.DataFrame(list(tag_freq_matrix.items()), columns=['Tag', 'Count'])
+df_ml = df_ml.sort_values(by="Count", ascending=False)
+
+
+tag_list = df_ml.values.tolist()
 df_ml = df_ml.head(20)
 df_ml.plot(ax=ax1, kind="bar", title="ml.net")
 

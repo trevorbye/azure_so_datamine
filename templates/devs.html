@@ -16,23 +16,21 @@
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
         <span><img class="logo" src="/static/so-icon.png" width="60" height="60"></span>
-      <a class="navbar-brand" href="#">Stack Overflow Datamine Interface</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        <a class="navbar-brand" href="#">Stack Overflow Datamine Interface</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-
-      </div>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault"></div>
     </nav>
 
     <div class="container">
         <div class="row">
             <div class="col-sm-4 col-sm-offset-4"><!--width is set by this div -->
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="azure" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                    <input type="text" class="form-control" placeholder="azure-machine-learning" aria-label="Recipient's username" aria-describedby="basic-addon2">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="searchy">Mine</button>
+                        <button class="btn btn-outline-secondary" type="button" id="mine-devs">Mine</button>
                     </div>
                 </div>
             </div>
@@ -46,21 +44,25 @@
 
     <div class="jumbotron" id="welc-banner" style="display: none">
         <div class="container">
-          <h1 class="display-3">Research Stack Overflow Tags</h1>
-          <p>Stack Overflow tags are a system for categorizing questions and content. Every tech stack has it's own unique tag,
-              and you use this tag to extract detailed information about everything related to it. Search any phrase to see if there
-              is a tag that includes your search text.
-          </p>
+          <h1 class="display-3">Detailed Developer Mining</h1>
+          <p>Enter a valid Stack Overflow tag, and extract detailed data about the developers that use this tag. </p>
         </div>
     </div>
 
     <div class="container">
         <div class="row">
-            <div class="col-sm">
-                <div id="chart-container" style="min-width: 310px; height: 450px; max-width: 600px; margin: 0 auto"></div>
+            <div class="col-6">
+                <div id="dev-tags" style="min-width: 310px; height: 450px; max-width: 600px; margin: 0 auto"></div>
             </div>
-            <div class="col-sm">
-                <table id="list-table" class="display" width="100%"></table>
+            <div class="col-6">
+                <table id="tag-list-table" class="display" width="100%"></table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div id="dev-rep" style="min-width: 310px; height: 500px; max-width: 600px; margin: 0 auto"></div>
+            </div>
+            <div class="col-6">
             </div>
         </div>
     </div>
@@ -74,6 +76,7 @@
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
 
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 </html>

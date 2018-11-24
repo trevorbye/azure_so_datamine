@@ -1,8 +1,24 @@
 body {
-  padding-top: 60px;
+  padding-top: 40px;
 }
 
-
 .container {
-    padding-top: 60px
+    padding-top: 50px
+}
+
+.btn btn-outline-secondary:focus, .btn btn-outline-secondary:active {
+   outline: none !important;
+   box-shadow: none;
+}
+
+.form-control:focus {
+  outline: none;
+  box-shadow:none !important;
+  border:1px solid #422918;
+}
+
+#icon-1, #icon-2, #icon-3 {
+    display: block !important;
+    margin: auto !important;
+    color: #ff9933;
 }
