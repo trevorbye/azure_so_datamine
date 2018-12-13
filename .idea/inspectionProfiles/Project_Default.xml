@@ -6,6 +6,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="dict.items" />
+          <option value="typing.Iterable.__getitem__" />
         </list>
       </option>
     </inspection_tool>

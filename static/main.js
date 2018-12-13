@@ -5,6 +5,7 @@ $(function() {
 
         e.preventDefault();
         var searchVal = $(".form-control").val();
+        console.log(searchVal)
 
         if (searchVal != "") {
 
@@ -16,63 +17,70 @@ $(function() {
                 },
 
                 error: function() {
-                   alert("Error");
+                   $("#loading").hide();
+                   $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
                 },
 
                 success: function(response) {
-                   $("#welc-banner").hide();
-                   $("#loading").hide();
+                   if (response.chartData.length == 0) {
+                       $("#loading").hide();
+                       $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+                   } else {
+                       $("#welc-banner").hide();
+                       $("#loading").hide();
 
-                   Highcharts.chart('chart-container', {
-                        chart: {
-                            plotBackgroundColor: null,
-                            plotBorderWidth: null,
-                            plotShadow: false,
-                            type: 'pie'
-                        },
-                        title: {
-                            text: 'Tag Distribution, total question counts: ' + searchVal
-                        },
-                        tooltip: {
-                            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                        },
-                        plotOptions: {
-                            pie: {
-                                allowPointSelect: true,
-                                cursor: 'pointer',
-                                dataLabels: {
-                                    enabled: false,
-                                    format: '<b>{point.name}</b>: {point.y:,.0f}',
-                                    style: {
-                                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                       Highcharts.chart('chart-container', {
+                            chart: {
+                                plotBackgroundColor: null,
+                                plotBorderWidth: null,
+                                plotShadow: false,
+                                type: 'pie'
+                            },
+                            title: {
+                                text: 'Tag Distribution, total question counts: ' + searchVal
+                            },
+                            tooltip: {
+                                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                            },
+                            plotOptions: {
+                                pie: {
+                                    allowPointSelect: true,
+                                    cursor: 'pointer',
+                                    dataLabels: {
+                                        enabled: false,
+                                        format: '<b>{point.name}</b>: {point.y:,.0f}',
+                                        style: {
+                                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        series: [{
-                            name: 'Tags',
-                            colorByPoint: true,
-                            data: response.chartData
-                        }]
-                    });
+                            },
+                            series: [{
+                                name: 'Tags',
+                                colorByPoint: true,
+                                data: response.chartData
+                            }]
+                        });
 
-                    if ($.fn.DataTable.isDataTable("#list-table") ) {
-                        $('#list-table').DataTable().destroy();
+                       if ($.fn.DataTable.isDataTable("#list-table") ) {
+                           $('#list-table').DataTable().destroy();
+                       }
+
+                       $('#list-table').DataTable({
+                           "order": [[ 1, "desc" ]],
+                           data: response.tableData,
+                           "pageLength": 8,
+                           columns: [
+                               { title: "Tag Name" },
+                               { title: "Question Count" }
+                           ]
+                       });
                     }
-
-                    $('#list-table').DataTable({
-                        "order": [[ 1, "desc" ]],
-                        data: response.tableData,
-                        "pageLength": 8,
-                        columns: [
-                            { title: "Tag Name" },
-                            { title: "Question Count" }
-                        ]
-                    });
                 }
             });
         } else {
             $("#loading").hide();
+            $("#empty-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
         }
     });
 
@@ -91,7 +99,8 @@ $(function() {
                 "type" : "GET",
 
                 error: function() {
-                   alert("Error");
+                   $("#loading").hide();
+                   $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
                 },
 
                 success: function(response) {
@@ -189,6 +198,62 @@ $(function() {
                         }]
                     });
 
+                    Highcharts.chart('tag-trend', {
+                        chart: {
+                            zoomType: 'x'
+                        },
+                        title: {
+                            text: 'Tag Question Count Trend Over Time'
+                        },
+                        subtitle: {
+                            text: document.ontouchstart === undefined ?
+                                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+                        },
+                        xAxis: {
+                            type: 'datetime'
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Question Count'
+                            }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            area: {
+                                fillColor: {
+                                    linearGradient: {
+                                        x1: 0,
+                                        y1: 0,
+                                        x2: 0,
+                                        y2: 1
+                                    },
+                                    stops: [
+                                        [0, Highcharts.getOptions().colors[0]],
+                                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                    ]
+                                },
+                                marker: {
+                                    radius: 2
+                                },
+                                lineWidth: 1,
+                                states: {
+                                    hover: {
+                                        lineWidth: 1
+                                    }
+                                },
+                                threshold: null
+                            }
+                        },
+
+                        series: [{
+                            type: 'area',
+                            name: 'Question Count by Week',
+                            data: response.tagTrendData
+                        }]
+                    });
+
                     if ($.fn.DataTable.isDataTable("#tag-list-table") ) {
                         $('#tag-list-table').DataTable().destroy();
                     }
@@ -207,8 +272,133 @@ $(function() {
             })
         } else {
             $("#loading").hide();
+            $("#empty-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
         }
 
+
+    });
+
+    $("#mine-text").on("click", function(e) {
+        $("#loading").show();
+
+        e.preventDefault();
+        var searchVal = $(".form-control").val();
+
+        if (searchVal != "") {
+            $.ajax({
+
+                "url" : "/get-text-analytics?tagname=" + searchVal,
+                "type" : "GET",
+
+                error: function() {
+                   $("#loading").hide();
+                   $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+                },
+
+                success: function(response) {
+                    $("#welc-banner").hide();
+                    $("#loading").hide();
+
+                    if ($.fn.DataTable.isDataTable("#body-word-list") ) {
+                        $('#body-word-list').DataTable().destroy();
+                    }
+
+                    if ($.fn.DataTable.isDataTable("#msdocs-matrix") ) {
+                        $('#msdocs-matrix').DataTable().destroy();
+                    }
+
+                    $("#title-1").show();
+                    $("#title-2").show();
+
+                    $("#card-item-1").text("Total Questions: " + response.msDocsSummaryStats.totalQuestions);
+                    $("#card-item-2").text("Total MSDocs Links: " + response.msDocsSummaryStats.totalLinks);
+                    $("#card-item-3").text("Unique MSDocs Links: " + response.msDocsSummaryStats.uniqueLinks);
+                    $("#card-item-4").text("Total MSDocs Links as % of Total Questions: " + response.msDocsSummaryStats.linksPercent);
+                    $("#summary-stats").show();
+
+                    $('#body-word-list').DataTable({
+                        "order": [[ 1, "desc" ]],
+                        data: response.bodyWordList,
+                        "pageLength": 8,
+                        columns: [
+                            { title: "Word" },
+                            { title: "Usage Count" }
+                        ]
+                    });
+
+                    $('#msdocs-matrix').DataTable({
+                        "order": [[ 2, "desc" ]],
+                        data: response.msDocsUriMatrix,
+                        "pageLength": 3,
+                        columns: [
+                            {title: "Full URL",
+                             "render": function (data, type, row, meta) {
+                                  return '<a href="' + data + '">' + data + '</a>';
+                            }
+                            },
+                            {title: "Article"},
+                            {title: "Linked Count"}
+                        ]
+                    });
+
+                    Highcharts.chart('cosine-matrix', {
+                        chart: {
+                            type: 'packedbubble',
+                            height: '500px',
+
+                        },
+                        title: {
+                            text: 'Question Title Semantic Similarity'
+                        },
+                        tooltip: {
+                            useHTML: true,
+                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions'
+                        },
+                        plotOptions: {
+                            packedbubble: {
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.name}',
+                                    filter: {
+                                        property: 'y',
+                                        operator: '>',
+                                        value: 250
+                                    },
+                                    style: {
+                                        color: 'black',
+                                        textOutline: 'none',
+                                        fontWeight: 'normal'
+                                    }
+                                },
+                                minPointSize: 5
+                            }
+                        },
+                        series: [{
+                            name: searchVal,
+                            data: response.cosineSimilarity
+                        }],
+                        responsive: {
+                            rules: [{
+                                condition: {
+                                    maxWidth: 500
+                                },
+                                chartOptions: {
+                                    legend: {
+                                        align: 'right',
+                                        verticalAlign: 'middle',
+                                        layout: 'vertical'
+                                    }
+                                }
+                            }]
+                        }
+                    });
+                }
+
+            })
+        } else {
+            $("#loading").hide();
+            $("#empty-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+        }
 
     });
 

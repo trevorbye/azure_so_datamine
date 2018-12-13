@@ -30,7 +30,7 @@
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="azure-machine-learning" aria-label="Recipient's username" aria-describedby="basic-addon2">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="mine-devs">Mine</button>
+                        <button class="btn btn-outline-secondary" type="button" id="mine-text">Mine</button>
                     </div>
                 </div>
             </div>
@@ -52,28 +52,48 @@
 
     <div class="jumbotron" id="welc-banner" style="display: none">
         <div class="container">
-          <h1 class="display-3">Detailed Developer Mining</h1>
-          <p>Enter a valid Stack Overflow tag, and extract detailed data about the developers that use this tag.</p>
+          <h1 class="display-3">Text Mining and NLP</h1>
+          <p>Enter a valid Stack Overflow tag, and perform text-mining and NLP on the results. Extract word lists from question bodies, run semantic comparisons between question titles, and gain visibility to whenever someone links to our documentation.</p>
         </div>
     </div>
 
     <div class="container">
+
         <div class="row">
             <div class="col-md-6">
-                <div id="dev-tags" style="min-width: 310px; height: 450px; max-width: 600px; margin: 0 auto"></div>
+                <div id="cosine-matrix" style="min-width: 310px; height: 500px margin: 0 auto"></div>
             </div>
             <div class="col-md-6">
-                <table id="tag-list-table" class="display" width="100%"></table>
+                <div class="alert alert-primary" role="alert" id="title-1" style="display: none">
+                    Word list from Question Body Text
+                </div>
+                <table id="body-word-list" class="display" width="100%"></table>
             </div>
         </div>
+
         <div class="row mt-3">
-            <div class="col-md-6">
-                <div id="dev-rep" style="min-width: 310px; height: 500px; max-width: 600px; margin: 0 auto"></div>
-            </div>
-            <div class="col-md-6">
-                <div id="tag-trend" style="min-width: 310px; height: 500px; max-width: 600px; margin: 0 auto"></div>
+            <div class="col-md-12">
+                <div class="alert alert-primary" role="alert" id="title-2" style="display: none">
+                    MSDocs Links Parsed from Question Body Text
+                </div>
+                <table id="msdocs-matrix" class="display" width="100%"></table>
             </div>
         </div>
+
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card text-white bg-success mb-3" id="summary-stats" style="display: none">
+                  <div class="card-header">MSDocs Links Summary Statistics</div>
+                  <ul class="list-group list-group-flush">
+                      <li class="list-group-item text-dark" id="card-item-1">1</li>
+                      <li class="list-group-item text-dark" id="card-item-2">1</li>
+                      <li class="list-group-item text-dark" id="card-item-3">1</li>
+                      <li class="list-group-item text-dark" id="card-item-4">1</li>
+                  </ul>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </body>
@@ -86,6 +106,7 @@
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
 
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 </html>

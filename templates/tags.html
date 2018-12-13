@@ -15,7 +15,7 @@
 
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
-        <span><img class="logo" src="/static/so-icon.png" width="60" height="60"></span>
+        <span><img class="logo" src="/static/so-icon.png" width="45" height="45"></span>
       <a class="navbar-brand" href="#">Stack Overflow Datamine Interface</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -40,7 +40,15 @@
                 <div id="loading" style="display: none; padding-top: 2px">
                     <i class="fa fa-spinner fa-spin fa-2x" aria-hidden="true"></i>
                 </div>
-             </div>
+            </div>
+            <div class="col-sm-4 col-sm-offset-4">
+                <div class="alert alert-danger" role="alert" style="display: none" id="bad-tag-alert">
+                    No results were found for this query. Try a different search string.
+                </div>
+                <div class="alert alert-warning" role="alert" style="display: none" id="empty-tag-alert">
+                    Search field is empty.
+                </div>
+            </div>
         </div>
     </div>
 

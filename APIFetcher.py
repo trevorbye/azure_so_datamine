@@ -3,6 +3,9 @@ import math
 import time
 import requests
 import UtilityMethods
+from sklearn.ensemble import IsolationForest
+import numpy as np
+import pandas
 
 api_key = "uTbSik2jd6UJmkIC3DguOg(("
 
@@ -22,7 +25,7 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
     accumulated_backoff_time_sec = 0
     page = 1
 
-    base_url = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&site=stackoverflow" \
+    base_url = "https://api.stackexchange.com/2.2/questions?order=desc&sort=creation&site=stackoverflow" \
                "&tagged=" + string_tag + "&filter=withbody" + "&pagesize=100&key=" + api_key
 
     while has_more:
@@ -80,6 +83,15 @@ def get_question_bodies(question_list):
         list_question_bodies.append(question["body"])
 
     return list_question_bodies
+
+
+def get_question_title_bodies(question_list):
+    list_title_bodies = []
+
+    for question in question_list:
+        list_title_bodies.append(question["title"])
+
+    return list_title_bodies
 
 
 def build_id_groups_for_batching(question_list, id_type):
@@ -194,7 +206,21 @@ def get_rep_distribution_from_question_list(question_list):
         except:
             pass
 
-    return rep_list
+    np_array = np.array(rep_list)
+    reshaped = np_array.reshape((-1, 1))
+    clf = IsolationForest(contamination=0.03)
+    outliers = clf.fit_predict(reshaped)
+    outliers_as_list = np.array(outliers).tolist()
+
+    cleaned_list = []
+    ind = 0
+    for rep in rep_list:
+        outlier_val = outliers_as_list[ind]
+        if outlier_val == 1:
+            cleaned_list.append(rep)
+        ind = ind + 1
+
+    return cleaned_list
 
 
 def get_tag_list_where_includes(include_string, max_backoff_wait_time_sec):
@@ -300,14 +326,17 @@ def extract_msdocs_uris_in_text(list_of_documents):
 
                 # extract path, article desc, and rebuild full url
                 path = doc.split(root_test_string)[1].split("\"")[0]
+
+                if "#" in path:
+                    path = path.split("#")[0]
+
+                if path.endswith("/"):
+                    path = path[:-1]
+
                 article_desc = path.rpartition("/")[-1]
-
-                if "#" in article_desc:
-                    article_desc = article_desc.split("#")[0]
-
                 full_url = "https://docs.microsoft.com" + path
 
-                url_object = {"url": full_url, "article-desc": article_desc}
+                url_object = [full_url, article_desc]
                 msdocs_url_objects.append(url_object)
 
                 # delete only first occurrence of root URI
@@ -319,19 +348,13 @@ def extract_msdocs_uris_in_text(list_of_documents):
 
 
 def build_msdcos_freq_matrix(list_of_msdcos_objects):
-    freq_matrix = {}
+    df = pandas.DataFrame(list_of_msdcos_objects, columns=['URL', 'Article'])
+    df.index.name = "id"
+    df = df.groupby(["URL", "Article"]).Article.agg("count").to_frame("Count").reset_index()
+    df = df.sort_values(by="Count", ascending=False)
+    df_as_list = df.values.tolist()
 
-    for msdoc_object in list_of_msdcos_objects:
-        article_desc = msdoc_object["article-desc"]
-
-        if article_desc in freq_matrix:
-            current_freq = freq_matrix[article_desc]
-            incremented_count = current_freq + 1
-            freq_matrix[article_desc] = incremented_count
-        else:
-            freq_matrix[article_desc] = 1
-
-    return freq_matrix
+    return df_as_list
 
 
 def key_phrase_extraction(list_of_docs):
@@ -363,5 +386,3 @@ def key_phrase_extraction(list_of_docs):
         list_aggregated_phrases.append(duplicates_removed)
 
     return list_aggregated_phrases
-
-

@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup as bs
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
+import time
+from datetime import datetime
+import pandas
 
 
 def parse_paragraph_content_from_list_docs(list_docs):
@@ -30,8 +33,7 @@ def remove_duplicates(input):
     return s
 
 
-def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms):
-    similarity_coeff = 0.2
+def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_coeff=0.2):
     list_semantic_groups = []
     vectorizer = TfidfVectorizer(min_df=1)
 
@@ -86,5 +88,97 @@ def build_wordlist_frm_keyphrases(list_key_phrases):
     return word_count_map
 
 
+def build_tag_trend_from_datelist(question_list):
+
+    list_times = [x["creation_date"] for x in question_list]
+    list_times.sort()
+    # test = [datetime.utcfromtimestamp(y).strftime('%Y-%m-%d %H:%M:%S') for y in list_times]
+
+    tmp_start_time = list_times[0]
+    current_time = time.time()
+    secs_in_week = 604800
+    tmp_end_time = tmp_start_time + secs_in_week
+
+    list_weeks_question_counts = []
+    while tmp_end_time < current_time:
+
+        question_count = 0
+        for time_val in list_times:
+            if tmp_start_time <= time_val < tmp_end_time:
+                question_count = question_count + 1
+
+            if time_val >= tmp_end_time:
+                break
+
+        time_marker_object = [tmp_start_time, question_count]
+        list_weeks_question_counts.append(time_marker_object)
+
+        tmp_start_time = tmp_end_time
+        tmp_end_time = tmp_end_time + secs_in_week
+
+    # multiply unix time by 1000 to get milliseconds for javascript compatibility
+    for week in list_weeks_question_counts:
+        val = week[0]
+        val = val * 1000
+        week[0] = val
+
+    return list_weeks_question_counts
 
 
+def build_summary_stats(question_body_count, msdocs_link_count, matrix):
+    summary_object = {}
+    summary_object["totalQuestions"] = question_body_count
+    summary_object["totalLinks"] = msdocs_link_count
+    summary_object["uniqueLinks"] = len(matrix)
+    summary_object["linksPercent"] = (summary_object["totalLinks"]*1.0) / \
+                                                             (summary_object["totalQuestions"]*1.0)
+
+    return summary_object
+
+
+def prune_key_phrases(key_phrases, prune_ratio=0.01):
+    word_list = build_wordlist_frm_keyphrases(key_phrases)
+    df_wordlist = pandas.DataFrame(list(word_list.items()), columns=['Word', 'Freq'])
+    df_wordlist = df_wordlist.sort_values(by="Freq", ascending=False)
+    df_as_list = df_wordlist.values.tolist()
+
+    # get first 5% of words; most common used words
+    wordlist_size = len(df_as_list)
+    first_n_words = int(round(prune_ratio*wordlist_size))
+    words_to_remove = df_as_list[:first_n_words]
+    remove_list = [x[0] for x in words_to_remove]
+
+    pruned_key_phrases = []
+    for phrase in key_phrases:
+        lowered = phrase.lower()
+
+        for word in remove_list:
+            if word in lowered:
+                lowered = lowered.replace(word, "")
+
+        lowered = ' '.join(lowered.split())
+        pruned_key_phrases.append(lowered)
+
+    return pruned_key_phrases
+
+
+def build_semantic_groups_to_output(semantic_groups):
+    data_list = []
+
+    for group in semantic_groups:
+        unique_words = []
+        phrase_list = group["semantic-group"]
+
+        for phrase in phrase_list:
+            phrase_word_list = phrase.split()
+
+            for phrase_word in phrase_word_list:
+                if phrase_word not in unique_words:
+                    unique_words.append(phrase_word)
+
+        name = ', '.join(unique_words)
+        value = len(phrase_list)
+        data_object = {"name": name, "value": value}
+        data_list.append(data_object)
+
+    return data_list

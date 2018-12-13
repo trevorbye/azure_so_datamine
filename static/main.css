@@ -22,3 +22,9 @@ body {
     margin: auto !important;
     color: #ff9933;
 }
+
+#bad-tag-alert, #empty-tag-alert {
+    position: absolute;
+    z-index: 100;
+
+}
