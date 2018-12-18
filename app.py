@@ -93,10 +93,37 @@ def get_text_analytics():
     # builds cosine similarity data set
     question_title_bodies = APIFetcher.get_question_title_bodies(question_list)
     key_title_phrases = APIFetcher.key_phrase_extraction(question_title_bodies)
-    pruned_phrases = UtilityMethods.prune_key_phrases(key_title_phrases, 0.011)
+
+    # parametize this in UI
+    pruned_phrases = UtilityMethods.prune_key_phrases(key_title_phrases, 5)
     semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, 0.2)
-    data_list = UtilityMethods.build_semantic_groups_to_output(semantic_groups)
-    response_object["cosineSimilarity"] = data_list
+
+    data_object = UtilityMethods.build_semantic_groups_to_output(semantic_groups)
+    response_object["cosineSimilarity"] = data_object
+
+    return jsonify(response_object)
+
+
+@app.route("/refresh-text-analytics")
+def refresh_cosine_plot():
+    response_object = {}
+    tag_name = request.args.get("tagname", default="", type=str)
+    prune_val = request.args.get("prune-val", default=5, type=int)
+    cosine_val = request.args.get("cosine-val", default=0.2, type=float)
+
+    question_pages = APIFetcher.get_question_page_list_from_tag(tag_name, 300)
+    question_list = APIFetcher.get_question_list_from_pages(question_pages)
+
+    # builds cosine similarity data set
+    question_title_bodies = APIFetcher.get_question_title_bodies(question_list)
+    key_title_phrases = APIFetcher.key_phrase_extraction(question_title_bodies)
+
+    # parametrized in UI
+    pruned_phrases = UtilityMethods.prune_key_phrases(key_title_phrases, prune_val)
+    semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, cosine_val)
+
+    data_object = UtilityMethods.build_semantic_groups_to_output(semantic_groups)
+    response_object["cosineSimilarity"] = data_object
 
     return jsonify(response_object)
 

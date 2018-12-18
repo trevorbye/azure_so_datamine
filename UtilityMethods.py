@@ -36,8 +36,9 @@ def remove_duplicates(input):
 def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_coeff=0.2):
     list_semantic_groups = []
     vectorizer = TfidfVectorizer(min_df=1)
+    removed_empty_strings = [x for x in list_doc_key_terms if not x == ""]
 
-    for term_string in list_doc_key_terms:
+    for term_string in removed_empty_strings:
         if len(list_semantic_groups) == 0:
             semantic_group = {"semantic-group": [term_string]}
             list_semantic_groups.append(semantic_group)
@@ -51,6 +52,7 @@ def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_co
                 list_key_phrase_strings = semantic_group["semantic-group"]
 
                 for key_phrase_string in list_key_phrase_strings:
+
                     tfidf = vectorizer.fit_transform([key_phrase_string, term_string])
                     cosine_sim = (tfidf * tfidf.T).A[0, 1]
 
@@ -136,16 +138,14 @@ def build_summary_stats(question_body_count, msdocs_link_count, matrix):
     return summary_object
 
 
-def prune_key_phrases(key_phrases, prune_ratio=0.01):
+def prune_key_phrases(key_phrases, prune_size=5):
     word_list = build_wordlist_frm_keyphrases(key_phrases)
     df_wordlist = pandas.DataFrame(list(word_list.items()), columns=['Word', 'Freq'])
     df_wordlist = df_wordlist.sort_values(by="Freq", ascending=False)
     df_as_list = df_wordlist.values.tolist()
 
-    # get first 5% of words; most common used words
-    wordlist_size = len(df_as_list)
-    first_n_words = int(round(prune_ratio*wordlist_size))
-    words_to_remove = df_as_list[:first_n_words]
+    # get first n words to remove
+    words_to_remove = df_as_list[:prune_size]
     remove_list = [x[0] for x in words_to_remove]
 
     pruned_key_phrases = []
@@ -164,6 +164,7 @@ def prune_key_phrases(key_phrases, prune_ratio=0.01):
 
 def build_semantic_groups_to_output(semantic_groups):
     data_list = []
+    max_val = 0
 
     for group in semantic_groups:
         unique_words = []
@@ -178,7 +179,22 @@ def build_semantic_groups_to_output(semantic_groups):
 
         name = ', '.join(unique_words)
         value = len(phrase_list)
+        if value > max_val:
+            max_val = value
+
         data_object = {"name": name, "value": value}
         data_list.append(data_object)
 
-    return data_list
+    plot_object_list = []
+    for val in range(max_val):
+        series_object = {"name": str(val) + " question(s)"}
+        data = [x for x in data_list if x["value"] == val]
+        series_object["data"] = data
+        plot_object_list.append(series_object)
+
+    reversed_and_cleaned = []
+    for obj in reversed(plot_object_list):
+        if len(obj["data"]) > 0:
+            reversed_and_cleaned.append(obj)
+
+    return reversed_and_cleaned

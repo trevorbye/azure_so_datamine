@@ -1,4 +1,5 @@
 $(function() {
+    $("a.main-tool-tip").tooltip();
 
     $("#searchy").on("click", function(e) {
         $("#loading").show();
@@ -298,6 +299,7 @@ $(function() {
                 success: function(response) {
                     $("#welc-banner").hide();
                     $("#loading").hide();
+                    $("#cosine-form").show();
 
                     if ($.fn.DataTable.isDataTable("#body-word-list") ) {
                         $('#body-word-list').DataTable().destroy();
@@ -348,6 +350,89 @@ $(function() {
 
                         },
                         title: {
+                            text: 'Question Title Semantic Groups'
+                        },
+                        tooltip: {
+                            useHTML: true,
+                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions'
+                        },
+                        plotOptions: {
+                            packedbubble: {
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.name}',
+                                    filter: {
+                                        property: 'y',
+                                        operator: '>',
+                                        value: 250
+                                    },
+                                    style: {
+                                        color: 'black',
+                                        textOutline: 'none',
+                                        fontWeight: 'normal'
+                                    }
+                                },
+                                minPointSize: 5
+                            }
+                        },
+                        series: response.cosineSimilarity,
+                        responsive: {
+                            rules: [{
+                                condition: {
+                                    maxWidth: 500
+                                },
+                                chartOptions: {
+                                    legend: {
+                                        align: 'right',
+                                        verticalAlign: 'middle',
+                                        layout: 'vertical'
+                                    }
+                                }
+                            }]
+                        }
+                    });
+                }
+
+            })
+        } else {
+            $("#loading").hide();
+            $("#empty-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+        }
+
+    });
+
+    $("#refresh-cosine").on("click", function(e) {
+
+        e.preventDefault();
+        var pruneVal = $("#prune-val").val();
+        var cosineVal = $("#cosine-val").val();
+        var searchVal = $(".form-control").val();
+
+        if (pruneVal != "" && cosineVal != "") {
+            $("#cosine-matrix").hide();
+            $("#plot-refresh").show();
+
+            $.ajax({
+
+                "url" : "/refresh-text-analytics?tagname=" + searchVal + "&prune-val=" + pruneVal + "&cosine-val=" + cosineVal,
+                "type" : "GET",
+
+                error: function() {
+                   $("#plot-refresh").hide();
+                   $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+                },
+
+                success: function(response) {
+                    $("#plot-refresh").hide();
+                    $("#cosine-matrix").show();
+
+                    Highcharts.chart('cosine-matrix', {
+                        chart: {
+                            type: 'packedbubble',
+                            height: '500px',
+
+                        },
+                        title: {
                             text: 'Question Title Semantic Similarity'
                         },
                         tooltip: {
@@ -373,10 +458,7 @@ $(function() {
                                 minPointSize: 5
                             }
                         },
-                        series: [{
-                            name: searchVal,
-                            data: response.cosineSimilarity
-                        }],
+                        series: response.cosineSimilarity,
                         responsive: {
                             rules: [{
                                 condition: {
@@ -393,13 +475,8 @@ $(function() {
                         }
                     });
                 }
-
             })
-        } else {
-            $("#loading").hide();
-            $("#empty-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
         }
-
     });
 
 });

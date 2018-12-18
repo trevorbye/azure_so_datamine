@@ -361,28 +361,48 @@ def key_phrase_extraction(list_of_docs):
     base_url = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/keyPhrases"
     subscription_key = "a3d9dbb3f8904b2cbc465bfa5b2284f4"
 
-    list_doc_dicts = []
-    id = 1
-    for doc in list_of_docs:
-        tmp_dict = {"id": id, "language": "en", "text": doc}
-        list_doc_dicts.append(tmp_dict)
-        id = id + 1
+    list_size = len(list_of_docs)
+    num_groups = 0
 
-    documents = {"documents": list_doc_dicts}
-    headers = {'Ocp-Apim-Subscription-Key': subscription_key}
-    response = requests.post(base_url, headers=headers, json=documents)
-    key_phrases = response.json()
+    if list_size <= 1000:
+        num_groups = 1
+    else:
+        num_groups = math.ceil(list_size / 1000)
+
+    list_of_group_lists = []
+    index_start = 0
+    index_end = 999
+    for i in range(num_groups):
+        group_list = [x for x in list_of_docs if index_start <= list_of_docs.index(x) <= index_end]
+        list_of_group_lists.append(group_list)
+
+        index_start = index_start + 1000
+        index_end = index_end + 1000
 
     list_aggregated_phrases = []
-    docs = key_phrases["documents"]
 
-    for doc in docs:
-        combined_string = ""
-        phrases = doc["keyPhrases"]
-        for phrase in phrases:
-            combined_string = combined_string + " " + phrase
+    for group in list_of_group_lists:
 
-        duplicates_removed = UtilityMethods.remove_duplicates(combined_string)
-        list_aggregated_phrases.append(duplicates_removed)
+        list_doc_dicts = []
+        id = 1
+        for doc in group:
+            tmp_dict = {"id": id, "language": "en", "text": doc}
+            list_doc_dicts.append(tmp_dict)
+            id = id + 1
+
+        documents = {"documents": list_doc_dicts}
+        headers = {'Ocp-Apim-Subscription-Key': subscription_key}
+        response = requests.post(base_url, headers=headers, json=documents)
+        key_phrases = response.json()
+        docs = key_phrases["documents"]
+
+        for doc in docs:
+            combined_string = ""
+            phrases = doc["keyPhrases"]
+            for phrase in phrases:
+                combined_string = combined_string + " " + phrase
+
+            duplicates_removed = UtilityMethods.remove_duplicates(combined_string)
+            list_aggregated_phrases.append(duplicates_removed)
 
     return list_aggregated_phrases
