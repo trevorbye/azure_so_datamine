@@ -359,7 +359,7 @@ def build_msdcos_freq_matrix(list_of_msdcos_objects):
 
 def key_phrase_extraction(list_of_docs):
     base_url = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/keyPhrases"
-    subscription_key = "a3d9dbb3f8904b2cbc465bfa5b2284f4"
+    subscription_key = "gityourownkey"
 
     list_size = len(list_of_docs)
     num_groups = 0
