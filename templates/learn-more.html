@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+
+<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+        <span><img class="logo" src="/static/so-icon.png" width="45" height="45"></span>
+      <a class="navbar-brand" href="/">Stack Overflow Datamine Interface (preview)</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="/">Home</a>
+            <a class="nav-item nav-link" href="/tags">Tags</a>
+            <a class="nav-item nav-link" href="/text-analytics">Text</a>
+            <a class="nav-item nav-link" href="/devs">Devs</a>
+              <a class="nav-item nav-link active" href="/learn-more">Docs</a>
+          </div>
+      </div>
+    </nav>
+
+    <div class="jumbotron" id="welc-banner-no-fade">
+        <div class="container">
+          <h1 class="display-3">Documentation</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <div>
+                     <h1>Why data mine Stack Overflow?</h1>
+                     <br>
+                     <p>
+                         Stack Overflow is the most widely-used forum where developers can ask and answer questions about almost any programming language or software stack. Extracting information from questions
+                         can help you understand issues with a product or service and consistent problems developers have. Additionally, information can be retrieved from the actual developers that post these questions,
+                         in order to understand their experience and background as it relates to a software stack.
+                         <br>
+                         <br>
+                         Community moderation standards ensure that questions are posed clearly and concisely, with all relevant information included so that future developers can use the question and accompanying answer
+                         as an archive for information. Poorly written or ambiguous questions are heavily monitored and removed from the site. This heavy community moderation by the developers themselves makes Stack Overflow highly
+                         worth extracting information from, because the data is, for the most part, inherently clean of irrelevant points.
+                         <br>
+                         <br>
+                         Data mining specific areas of Stack Overflow has many different practical use-cases:
+                         <ul>
+                            <li>Understanding question content to uncover bugs, poor software design, and recurring pain-points for devs</li>
+                            <li>Analyzing competing products, and their developer communities</li>
+                            <li>Finding references to our documentation, to understand both relative docs usage as well as any issues</li>
+                            <li>Truly understanding the type of developer that uses a product or service, and tailoring documentation/outreach based on the data</li>
+                        </ul>
+                     </p>
+                    <br>
+
+                    <h1>The tag system</h1>
+                    <br>
+                    <p>
+                        Stack Overflow uses a tag system to categorize questions and organize content. This system works very similar to a hashtag system on Twitter or Instagram, as querying on a specific tag
+                        will act as a filter for only content categorized under that tag. In the majority of cases, every discrete programming language/tool kit/sdk/etc will have its own unique tag. When a question is asked
+                        on Stack Overflow, the user is required to tag the question to help developers that work in those stacks to see the question and provide an answer. Questions can have multiple tags applied to them.
+                        <br>
+                        <br>
+                        In general, questions are typically tagged with a highly popular tag like <code>python</code> or <code>sql</code> to provide high-level context, and more-detailed tags like <code>azure-machine-learning</code> or <code>spring-data-elasticsearch</code> to narrow in to a specific technology.
+                        For the usage of this tool, choosing the more-granular tags to research will yield the most relevant and useful results.
+                    </p>
+                    <br>
+
+                    <h1>Where does the data come from?</h1>
+                    <br>
+                    <p>
+                        All data in this application is extracted in real-time on live-site data using the official <a href="https://api.stackexchange.com/docs">StackExchange API.</a> All visualizations and tables are built by first extracting the questions from specific tags.
+                        For tags that have less than 5,000 total questions, all questions are mined. For popular tags that have more than 5,000 total questions, the most recent 5,000 questions are mined as a sample to avoid exceeding API rate limits.
+
+                        <br>
+                        <br>
+                        Running these algorithms on popular tags can take 5-10 minutes, as the data must first be extracted and then processed. The trade-off of live querying is that <i>any</i> valid tag
+                        can be queried, rather than restricting to a subset of tags that have been pre-mined and archived.
+                    </p>
+                    <br>
+
+                    <h1>Usage guide and algorithm explanations</h1>
+                    <br>
+
+                    <h2>Tags</h2>
+                    <br>
+                    <p>
+                        The <a href="/tags">tag mining</a> page allows you to research Stack Overflow tags, and visualize their relative usage compared to similar tags. The input field accepts a string, and
+                        returns all tags that contain that string <i>anywhere</i> in the full tag string. The totals in the table and pie chart are all-time question totals. An error response is returned if there are no
+                        tags that contain the search string.
+                    </p>
+                    <br>
+
+                    <h2>Text</h2>
+                    <br>
+                    <p>
+                        The <a href="/text-analytics">text mining</a> page allows you to view detailed data sourced from the text of questions and question titles. The main input field accepts a valid Stack Overflow tag as a parameter. Key visualizations returned are:
+                    </p>
+                    <br>
+
+                    <h4>Question title semantic groups</h4>
+                    <br>
+                    <p>
+                        The algorithm behind this visualization extracts the title text from all questions, and attempts to place them into groups of other semantically-similar question titles. Key phrase extraction is
+                        first performed on all question titles to eliminate stop words and other irrelevant parts of speech. Next, a full word list is built from all titles. The <code>prune val</code> parameter filters out
+                        the <i>n</i> most used words (default=5) from the list and removes them from all titles. This process removes the most common words so that irrelevant semantic groups are not built.
+
+                        <br>
+                        <br>
+                        Next, <a href="https://towardsdatascience.com/overview-of-text-similarity-metrics-3397c4601f50">cosine similarity</a> is computed between each cleaned title using the <code>scikit-learn</code> library, and titles that meet or exceed a certain threshold (default=0.2)
+                        will be grouped together. All titles in each group are then combined, duplicate words are removed, and a final unique list of words are generated from the group, along with the total number of questions the group represents.
+                        <br>
+                        <br>
+                        Both <code>prune val</code> and <code>cosine similarity</code> become mutable parameters that can be changed in the inputs above the chart, and the chart can then be run again for new results. Increase the <code>prune val</code> to increase the number of common words excluded from grouping.
+                        Increase <code>cosine similarity</code> up to a max of <code>1</code> to increase the strictness of how close titles must be to be grouped together. Increasing this parameter will create more total groups and more un-grouped questions, but the groups that result will contain titles that are much closer
+                        together in similarity.
+                    </p>
+                    <br>
+
+                    <h4>Word list from question bodies</h4>
+                    <br>
+                    <p>
+                        This table is simply a bag-of-words ranking built from the question bodies. The table is searchable to find the occurrence and frequency of words that are used in question bodies.
+                    </p>
+                    <br>
+
+                    <h4>MSDocs links parsed from question bodies</h4>
+                    <br>
+                    <p>
+                        This algorithm searches all question bodies, and parses out <code>docs.microsoft.com</code> urls that users have linked to, and totals how many times each url has been linked to.
+                    </p>
+                    <br>
+
+                    <h2>Devs</h2>
+                    <br>
+                    <p>
+                        The <a href="/devs">developer mining</a> page allows you extract information about the developers (users) that posted the mined questions. The main input field accepts a valid Stack Overflow tag as a parameter. Key visualizations returned are:
+                    </p>
+                    <br>
+
+                    <h4>Top tags</h4>
+                    <br>
+                    <p>
+                        The top tags chart and table returns an aggregated profile of all the developers that used your queried tag. The algorithm first goes through each question returned for your tag, and extracts each user id for the question asker.
+                        Then each user profile is queried from the user id, to extract a list of tags that the respective user has used, and totals the question and answer counts for each tag. In a practical sense, this reveals all tags that each user has been active in. These tag totals
+                        are then summed across all developers to build a ranking of all tags that the developer group uses.
+                        <br>
+                        <br>
+
+                        For example, if you query the <code>azure-cognitive-services</code> tag, the top 3 developer tags returned are <code>angular</code>, <code>c#</code>, and <code>angularjs</code>. This means that for developers
+                        posting questions under the <code>azure-cognitive-services</code> tag, they are mostly developers that ask or answer questions that include the <code>angular</code>, <code>c#</code>, and <code>angularjs</code> tags.
+                    </p>
+                    <br>
+
+                    <h4>Dev reputation distribution</h4>
+                    <br>
+                    <p>
+                        This chart grabs each user off of each extracted question, and builds a distribution from each user's repuation level. Reputation on Stack Overflow is very difficult to gain, thus analyzing
+                        the reputation level under a specific tag is a valuable way to understand developer experience level. High SO reputation is only attained by highly-experienced developers.
+                        <br>
+                        <br>
+
+                        The histogram places the reputation data into bins, and additionally each point on the chart represents the same data, but with an individual point for each user/question.
+                    </p>
+                    <br>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script type = "text/javascript" src = "/static/bootstrap.min.js"></script>
+<script type = "text/javascript" src = "/static/main.js"></script>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+
+</html>

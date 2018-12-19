@@ -25,6 +25,11 @@ def text_page():
     return render_template("text.html", title="Text Analytics")
 
 
+@app.route("/learn-more")
+def learn_page():
+    return render_template("learn-more.html", title="Documentation")
+
+
 # /get-tags-from-string-contained?instring=azure&maxbackoffsec=200
 @app.route("/get-tags-from-string-contained")
 def get_tags():
