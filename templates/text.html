@@ -13,25 +13,25 @@
     <title>{{title}}</title>
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
-        <span><img class="logo" src="/static/so-icon.png" width="45" height="45"></span>
-        <a class="navbar-brand" href="/">Stack Overflow Datamine Interface (preview)</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+    <span><a href="/"><img class="logo" src="/static/so-icon.png" width="45" height="45"></a></span>
+    <a class="navbar-brand d-none d-sm-block" href="/">Stack Overflow Datamine Interface (preview)</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link" href="/">Home</a>
-                <a class="nav-item nav-link" href="/tags">Tags</a>
-                <a class="nav-item nav-link active" href="/text-analytics">Text</a>
-                <a class="nav-item nav-link" href="/devs">Devs</a>
-                <a class="nav-item nav-link" href="/learn-more">Docs</a>
-            </div>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" href="/">Home</a>
+            <a class="nav-item nav-link" href="/tags">Tags</a>
+            <a class="nav-item nav-link active" href="/text-analytics">Text</a>
+            <a class="nav-item nav-link" href="/devs">Devs</a>
+            <a class="nav-item nav-link" href="/learn-more">Docs</a>
         </div>
-    </nav>
+    </div>
+</nav>
 
+<body class="input-true">
     <div class="container">
         <div class="row">
             <div class="col-md-4"><!--width is set by this div -->
@@ -68,7 +68,6 @@
     </div>
 
     <div class="container">
-
         <div class="row">
             <div class="col-md-6">
 
@@ -100,7 +99,12 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary mb-2" id="refresh-cosine">Refresh</button>
+                    <div class="form-group">
+                        <div class="input-group ml-2 mb-2">
+                            <button type="submit" class="btn btn-primary" id="refresh-cosine">Refresh</button>
+                        </div>
+                    </div>
+
                 </form>
 
                 <div id="plot-refresh" style="display: none; margin-left: 50%; margin-top: 150px">

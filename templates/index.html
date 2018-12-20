@@ -9,23 +9,31 @@
     <meta charset="UTF-8">
     <title>{{title}}</title>
 </head>
-<body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
-      <span><img class="logo" src="/static/so-icon.png" width="45" height="45"></span>
-      <a class="navbar-brand" href="/">Stack Overflow Datamine Interface (preview)</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+<nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+  <span><a href="/"><img class="logo" src="/static/so-icon.png" width="45" height="45"></a></span>
+  <a class="navbar-brand d-none d-sm-block" href="/">Stack Overflow Datamine Interface (preview)</a>
 
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/">Home</a>
+        <a class="nav-item nav-link" href="/tags">Tags</a>
+        <a class="nav-item nav-link" href="/text-analytics">Text</a>
+        <a class="nav-item nav-link" href="/devs">Devs</a>
+          <a class="nav-item nav-link" href="/learn-more">Docs</a>
       </div>
-    </nav>
+  </div>
+</nav>
 
+<body class="input-false">
     <main role="main">
 
       <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
+      <div class="jumbotron jumbotron-fluid">
         <div class="container">
           <h1 class="display-3">Understand your developers</h1>
           <p>This interface mines data from Stack Overflow, in an effort to understand more about the community of developers that use different tags. </p>
@@ -35,7 +43,7 @@
 
       <div class="container">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2 mt-2">
             <div class="text-center">
               <i class="fa fa-tags fa-2x" aria-hidden="true" id="icon-1"></i>
             </div>
@@ -49,7 +57,7 @@
               <p><a class="btn btn-secondary" href="/tags" role="button">View details &raquo;</a></p>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2 mt-2">
             <div class="text-center">
               <i class="fa fa-database fa-2x" aria-hidden="true" id="icon-3"></i>
             </div>
@@ -63,7 +71,7 @@
               <p><a class="btn btn-secondary" href="/text-analytics" role="button">View details &raquo;</a></p>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2 mt-2">
             <div class="text-center">
               <i class="fa fa-code fa-2x" aria-hidden="true" id="icon-2"></i>
             </div>

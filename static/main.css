@@ -1,9 +1,13 @@
-body {
-  padding-top: 40px;
+.input-true {
+  padding-top: 100px;
+}
+
+.input-false {
+    padding-top: 30px;
 }
 
 .container {
-    padding-top: 50px
+    padding-top: 40px;
 }
 
 .btn btn-outline-secondary:focus, .btn btn-outline-secondary:active {
