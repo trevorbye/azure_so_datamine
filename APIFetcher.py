@@ -51,8 +51,8 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
         if not query_has_more_pages:
             has_more = False
 
-        # cut sample size at 50 pages (5000 entities) to avoid excessive API calls
-        if page >= 50:
+        # cut sample size at 25 pages (2500 entities) to avoid excessive API calls
+        if page >= 25:
             break
 
         page = page + 1
@@ -96,8 +96,7 @@ def get_question_title_bodies(question_list):
 
 def build_id_groups_for_batching(question_list, id_type):
     """
-    Builds unique id_list from questions, puts id's into groups of 80 to avoid excessive API requests, which I
-    have been known to do.
+    Builds unique id_list from questions, puts id's into groups of 80 to avoid excessive API requests
 
     :param question_list: return val from get_question_list_from_pages
     :param id_type: string name for id type, extracts different id from question object
@@ -384,8 +383,14 @@ def key_phrase_extraction(list_of_docs):
     for group in list_of_group_lists:
 
         list_doc_dicts = []
+        total_chars = 0
         id = 1
         for doc in group:
+            char_len = len(doc)
+            total_chars += char_len
+            if total_chars > 524000:
+                break
+
             tmp_dict = {"id": id, "language": "en", "text": doc}
             list_doc_dicts.append(tmp_dict)
             id = id + 1

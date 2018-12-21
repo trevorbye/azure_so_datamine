@@ -52,9 +52,14 @@ def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_co
                 list_key_phrase_strings = semantic_group["semantic-group"]
 
                 for key_phrase_string in list_key_phrase_strings:
+                    cosine_sim = 0
 
-                    tfidf = vectorizer.fit_transform([key_phrase_string, term_string])
-                    cosine_sim = (tfidf * tfidf.T).A[0, 1]
+                    try:
+                        tfidf = vectorizer.fit_transform([key_phrase_string, term_string])
+                        cosine_sim = (tfidf * tfidf.T).A[0, 1]
+                    except:
+                        add_to_group = False
+                        break
 
                     if cosine_sim < similarity_coeff:
                         add_to_group = False

@@ -83,11 +83,11 @@
                     <br>
                     <p>
                         All data in this application is extracted in real-time on live-site data using the official <a href="https://api.stackexchange.com/docs">StackExchange API.</a> All visualizations and tables are built by first extracting the questions from specific tags.
-                        For tags that have less than 5,000 total questions, all questions are mined. For popular tags that have more than 5,000 total questions, the most recent 5,000 questions are mined as a sample to avoid exceeding API rate limits.
+                        For tags that have less than 2,500 total questions, all questions are mined. For popular tags that have more than 2,500 total questions, the most recent 2,500 questions are mined as a sample to avoid exceeding API rate limits.
 
                         <br>
                         <br>
-                        Running these algorithms on popular tags can take 5-10 minutes, as the data must first be extracted and then processed. The trade-off of live querying is that <i>any</i> valid tag
+                        Running these algorithms on popular tags can take 10+ minutes, as the data must first be extracted and then processed. The trade-off of live querying is that <i>any</i> valid tag
                         can be queried, rather than restricting to a subset of tags that have been pre-mined and archived.
                     </p>
                     <br>
