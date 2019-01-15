@@ -52,7 +52,7 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
             has_more = False
 
         # cut sample size at 25 pages (2500 entities) to avoid excessive API calls
-        if page >= 25:
+        if page >= 15:
             break
 
         page = page + 1
