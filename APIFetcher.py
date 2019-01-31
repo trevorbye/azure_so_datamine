@@ -6,6 +6,7 @@ import UtilityMethods
 from sklearn.ensemble import IsolationForest
 import numpy as np
 import pandas
+from datetime import datetime
 
 api_key = "uTbSik2jd6UJmkIC3DguOg(("
 
@@ -52,7 +53,7 @@ def get_question_page_list_from_tag(string_tag, max_backoff_wait_time_sec):
             has_more = False
 
         # cut sample size at 25 pages (2500 entities) to avoid excessive API calls
-        if page >= 15:
+        if page >= 25:
             break
 
         page = page + 1
@@ -411,3 +412,16 @@ def key_phrase_extraction(list_of_docs):
             list_aggregated_phrases.append(duplicates_removed)
 
     return list_aggregated_phrases
+
+
+def build_views_ranking(question_list):
+    return_list = []
+
+    for question in question_list:
+        unix_timestamp = question["creation_date"]
+        parsed_date = datetime.utcfromtimestamp(unix_timestamp).strftime("%m-%d-%Y")
+
+        record = [question["title"], question["view_count"], parsed_date, question["link"]]
+        return_list.append(record)
+
+    return return_list

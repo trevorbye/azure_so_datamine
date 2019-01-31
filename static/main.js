@@ -161,7 +161,7 @@ $(function() {
 
                     Highcharts.chart('dev-rep', {
                         title: {
-                            text: 'Dev Reputation Distribution'
+                            text: 'Dev Reputation Distribution-- ' + "Median: " + response.medianRep
                         },
                         xAxis: [{
                             title: { text: 'Dev Number' },
@@ -474,6 +474,56 @@ $(function() {
                             }]
                         }
                     });
+                }
+            })
+        }
+    });
+
+    $("#mine-views").on("click", function(e) {
+        $("#loading").show();
+
+        e.preventDefault();
+        var searchVal = $(".form-control").val();
+
+        if (searchVal != "") {
+            $.ajax({
+
+                "url" : "/get-question-view-rank?tagname=" + searchVal,
+                "type" : "GET",
+
+                error: function() {
+                   $("#loading").hide();
+                   $("#bad-tag-alert").fadeIn("slow").delay(2500).fadeOut("slow");
+                },
+
+                success: function(response) {
+                    $("#welc-banner").hide();
+                    $("#loading").hide();
+
+                    if ($.fn.DataTable.isDataTable("#view-list-table") ) {
+                        $('#view-list-table').DataTable().destroy();
+                    }
+
+                    $.fn.dataTable.moment("M-D-YYYY");
+
+                    $('#view-list-table').DataTable({
+                        "order": [[ 1, "desc" ]],
+                        data: response,
+                        "pageLength": 20,
+                        columns: [
+                            {title: "Question Title"},
+                            {title: "Total Views"},
+                            {title: "Creation Date"},
+                            {title: "Link",
+                             "render": function (data, type, row, meta) {
+                                  return '<a href="' + data + '">' + data + '</a>';
+                                }
+                            }
+                        ]
+                    });
+
+
+
                 }
             })
         }

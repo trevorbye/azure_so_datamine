@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, render_template, url_for
 import pandas
 import APIFetcher
 import UtilityMethods
+import statistics
 app = Flask(__name__)
 
 
@@ -30,6 +31,11 @@ def learn_page():
     return render_template("learn-more.html", title="Documentation")
 
 
+@app.route("/question-views")
+def views_page():
+    return render_template("views.html", title="Question Views Rank")
+
+
 # /get-tags-from-string-contained?instring=azure&maxbackoffsec=200
 @app.route("/get-tags-from-string-contained")
 def get_tags():
@@ -38,6 +44,17 @@ def get_tags():
 
     tag_list_counts = APIFetcher.get_tag_list_where_includes(search_string_param, max_backoff_param)
     return jsonify(tag_list_counts)
+
+
+@app.route("/get-question-view-rank")
+def question_view_rank():
+    tag_name = request.args.get("tagname", default="", type=str)
+
+    question_pages = APIFetcher.get_question_page_list_from_tag(tag_name, 300)
+    question_list = APIFetcher.get_question_list_from_pages(question_pages)
+    table_object = APIFetcher.build_views_ranking(question_list)
+
+    return jsonify(table_object)
 
 
 @app.route("/get-dev-profile")
@@ -62,6 +79,7 @@ def get_dev_profile():
 
     user_rep_list = APIFetcher.get_rep_distribution_from_question_list(question_list)
     response_object["repDistData"] = user_rep_list
+    response_object["medianRep"] = statistics.median(user_rep_list)
 
     tag_trend_list = UtilityMethods.build_tag_trend_from_datelist(question_list)
     response_object["tagTrendData"] = tag_trend_list
