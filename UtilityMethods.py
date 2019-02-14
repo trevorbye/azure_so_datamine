@@ -33,14 +33,20 @@ def remove_duplicates(input):
     return s
 
 
-def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_coeff=0.2):
+def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, link_list, similarity_coeff=0.2):
     list_semantic_groups = []
     vectorizer = TfidfVectorizer(min_df=1)
-    removed_empty_strings = [x for x in list_doc_key_terms if not x == ""]
+    removed_empty_strings = []
+    removed_empty_links = []
 
-    for term_string in removed_empty_strings:
+    for phrase, link in zip(list_doc_key_terms, link_list):
+        if not phrase == "":
+            removed_empty_strings.append(phrase)
+            removed_empty_links.append(link)
+
+    for term_string, link in zip(removed_empty_strings, removed_empty_links):
         if len(list_semantic_groups) == 0:
-            semantic_group = {"semantic-group": [term_string]}
+            semantic_group = {"semantic-group": [term_string], "links": [link]}
             list_semantic_groups.append(semantic_group)
         else:
             # test current term_group against all existing semantic groups. If it isn't similar to any of them,
@@ -50,6 +56,7 @@ def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_co
             for semantic_group in list_semantic_groups:
                 add_to_group = True
                 list_key_phrase_strings = semantic_group["semantic-group"]
+                semantic_group_links = semantic_group["links"]
 
                 for key_phrase_string in list_key_phrase_strings:
                     cosine_sim = 0
@@ -67,12 +74,13 @@ def build_cosine_similarity_matrix_from_bodies(list_doc_key_terms, similarity_co
 
                 if add_to_group:
                     list_key_phrase_strings.append(term_string)
+                    semantic_group_links.append(link)
                     put_in_own_group = False
                     break
 
             # if it never got added to a semantic group, put in its own
             if put_in_own_group:
-                semantic_group = {"semantic-group": [term_string]}
+                semantic_group = {"semantic-group": [term_string], "links": [link]}
                 list_semantic_groups.append(semantic_group)
 
     return list_semantic_groups
@@ -187,7 +195,9 @@ def build_semantic_groups_to_output(semantic_groups):
         if value > max_val:
             max_val = value
 
-        data_object = {"name": name, "value": value}
+        links_string = build_links_to_anchor_string(group["links"])
+
+        data_object = {"name": name, "value": value, "links": links_string}
         data_list.append(data_object)
 
     plot_object_list = []
@@ -203,3 +213,18 @@ def build_semantic_groups_to_output(semantic_groups):
             reversed_and_cleaned.append(obj)
 
     return reversed_and_cleaned
+
+
+def build_links_to_anchor_string(links):
+    links_string = ""
+
+    question_num = 1
+    for link in links:
+        links_string = links_string + "<a href=\"" + link + "\">" + "Question " + str(question_num) + " link" + \
+                       "</a></br>"
+        question_num += 1
+
+    return links_string
+
+
+

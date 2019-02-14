@@ -353,8 +353,12 @@ $(function() {
                             text: 'Question Title Semantic Groups'
                         },
                         tooltip: {
+                            enabled: true,
                             useHTML: true,
-                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions'
+                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions' + '</br>' + '{point.links}',
+                            style: {
+            	                pointerEvents: 'auto'
+                            }
                         },
                         plotOptions: {
                             packedbubble: {
@@ -436,8 +440,12 @@ $(function() {
                             text: 'Question Title Semantic Similarity'
                         },
                         tooltip: {
+                            enabled: true,
                             useHTML: true,
-                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions'
+                            pointFormat: '<b>{point.name}:</b> {point.y} tot. questions' + '</br>' + '{point.links}',
+                            style: {
+            	                pointerEvents: 'auto'
+                            }
                         },
                         plotOptions: {
                             packedbubble: {

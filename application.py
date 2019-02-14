@@ -98,8 +98,9 @@ def get_text_analytics():
     question_bodies = APIFetcher.get_question_bodies(question_list)
     parsed_bodies = UtilityMethods.parse_paragraph_content_from_list_docs(question_bodies)
 
-    body_key_phrases = APIFetcher.key_phrase_extraction(parsed_bodies)
-    word_list = UtilityMethods.build_wordlist_frm_keyphrases(body_key_phrases)
+    body_key_phrases = APIFetcher.key_phrase_extraction(parsed_bodies, parsed_bodies)
+    key_phrase_list = body_key_phrases["phrases"]
+    word_list = UtilityMethods.build_wordlist_frm_keyphrases(key_phrase_list)
     df_wordlist = pandas.DataFrame(list(word_list.items()), columns=['Word', 'Freq'])
     df_wordlist = df_wordlist.sort_values(by="Freq", ascending=False)
     table_wordlist = df_wordlist.values.tolist()
@@ -114,12 +115,16 @@ def get_text_analytics():
     response_object["msDocsSummaryStats"] = summary_stats
 
     # builds cosine similarity data set
-    question_title_bodies = APIFetcher.get_question_title_bodies(question_list)
-    key_title_phrases = APIFetcher.key_phrase_extraction(question_title_bodies)
+    bodies_dict = APIFetcher.get_question_title_bodies(question_list)
+    title_body_list = bodies_dict["bodies"]
+    question_link_list = bodies_dict["links"]
 
-    # parametize this in UI
-    pruned_phrases = UtilityMethods.prune_key_phrases(key_title_phrases, 5)
-    semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, 0.2)
+    phrases_dict = APIFetcher.key_phrase_extraction(title_body_list, question_link_list)
+    phrase_list = phrases_dict["phrases"]
+    link_list = phrases_dict["links"]
+
+    pruned_phrases = UtilityMethods.prune_key_phrases(phrase_list, 5)
+    semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, link_list, 0.2)
 
     data_object = UtilityMethods.build_semantic_groups_to_output(semantic_groups)
     response_object["cosineSimilarity"] = data_object
@@ -138,12 +143,17 @@ def refresh_cosine_plot():
     question_list = APIFetcher.get_question_list_from_pages(question_pages)
 
     # builds cosine similarity data set
-    question_title_bodies = APIFetcher.get_question_title_bodies(question_list)
-    key_title_phrases = APIFetcher.key_phrase_extraction(question_title_bodies)
+    bodies_dict = APIFetcher.get_question_title_bodies(question_list)
+    title_body_list = bodies_dict["bodies"]
+    question_link_list = bodies_dict["links"]
+
+    phrases_dict = APIFetcher.key_phrase_extraction(title_body_list, question_link_list)
+    phrase_list = phrases_dict["phrases"]
+    link_list = phrases_dict["links"]
 
     # parametrized in UI
-    pruned_phrases = UtilityMethods.prune_key_phrases(key_title_phrases, prune_val)
-    semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, cosine_val)
+    pruned_phrases = UtilityMethods.prune_key_phrases(phrase_list, prune_val)
+    semantic_groups = UtilityMethods.build_cosine_similarity_matrix_from_bodies(pruned_phrases, link_list, cosine_val)
 
     data_object = UtilityMethods.build_semantic_groups_to_output(semantic_groups)
     response_object["cosineSimilarity"] = data_object

@@ -88,11 +88,15 @@ def get_question_bodies(question_list):
 
 def get_question_title_bodies(question_list):
     list_title_bodies = []
+    list_question_urls = []
 
     for question in question_list:
         list_title_bodies.append(question["title"])
+        list_question_urls.append(question["link"])
 
-    return list_title_bodies
+    return_dict = {"bodies": list_title_bodies, "links": list_question_urls}
+
+    return return_dict
 
 
 def build_id_groups_for_batching(question_list, id_type):
@@ -357,7 +361,7 @@ def build_msdcos_freq_matrix(list_of_msdcos_objects):
     return df_as_list
 
 
-def key_phrase_extraction(list_of_docs):
+def key_phrase_extraction(list_of_docs, list_LINKS):
     base_url = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/keyPhrases"
     subscription_key = "a3d9dbb3f8904b2cbc465bfa5b2284f4"
 
@@ -370,23 +374,28 @@ def key_phrase_extraction(list_of_docs):
         num_groups = math.ceil(list_size / 1000)
 
     list_of_group_lists = []
+    list_of_group_lists_LINKS = []
     index_start = 0
     index_end = 999
     for i in range(num_groups):
         group_list = [x for x in list_of_docs if index_start <= list_of_docs.index(x) <= index_end]
+        LINK_group_list = [x for x in list_LINKS if index_start <= list_LINKS.index(x) <= index_end]
+
         list_of_group_lists.append(group_list)
+        list_of_group_lists_LINKS.append(LINK_group_list)
 
         index_start = index_start + 1000
         index_end = index_end + 1000
 
     list_aggregated_phrases = []
+    corresponding_LINK_list = []
 
-    for group in list_of_group_lists:
+    for group, link_group in zip(list_of_group_lists, list_of_group_lists_LINKS):
 
         list_doc_dicts = []
         total_chars = 0
         id = 1
-        for doc in group:
+        for doc, link in zip(group, link_group):
             char_len = len(doc)
             total_chars += char_len
             if total_chars > 524000:
@@ -394,6 +403,7 @@ def key_phrase_extraction(list_of_docs):
 
             tmp_dict = {"id": id, "language": "en", "text": doc}
             list_doc_dicts.append(tmp_dict)
+            corresponding_LINK_list.append(link)
             id = id + 1
 
         documents = {"documents": list_doc_dicts}
@@ -411,7 +421,9 @@ def key_phrase_extraction(list_of_docs):
             duplicates_removed = UtilityMethods.remove_duplicates(combined_string)
             list_aggregated_phrases.append(duplicates_removed)
 
-    return list_aggregated_phrases
+    return_dict = {"phrases": list_aggregated_phrases, "links": corresponding_LINK_list}
+
+    return return_dict
 
 
 def build_views_ranking(question_list):
