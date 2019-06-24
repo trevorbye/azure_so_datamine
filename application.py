@@ -115,7 +115,7 @@ def get_text_analytics():
     response_object["msDocsSummaryStats"] = summary_stats
 
     # builds cosine similarity data set
-    bodies_dict = APIFetcher.get_question_title_bodies(question_list)
+    bodies_dict = APIFetcher.get_question_title_bodies(question_list[:100])
     title_body_list = bodies_dict["bodies"]
     question_link_list = bodies_dict["links"]
 
@@ -143,7 +143,7 @@ def refresh_cosine_plot():
     question_list = APIFetcher.get_question_list_from_pages(question_pages)
 
     # builds cosine similarity data set
-    bodies_dict = APIFetcher.get_question_title_bodies(question_list)
+    bodies_dict = APIFetcher.get_question_title_bodies(question_list[:250])
     title_body_list = bodies_dict["bodies"]
     question_link_list = bodies_dict["links"]
 

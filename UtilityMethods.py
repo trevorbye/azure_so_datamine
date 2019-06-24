@@ -145,9 +145,11 @@ def build_summary_stats(question_body_count, msdocs_link_count, matrix):
     summary_object["totalQuestions"] = question_body_count
     summary_object["totalLinks"] = msdocs_link_count
     summary_object["uniqueLinks"] = len(matrix)
-    summary_object["linksPercent"] = (summary_object["totalLinks"]*1.0) / \
-                                                             (summary_object["totalQuestions"]*1.0)
 
+    percentage = (summary_object["totalLinks"]*1.0) / (summary_object["totalQuestions"]*1.0)
+    percentage_string = '{:.2%}'.format(percentage)
+
+    summary_object["linksPercent"] = percentage_string
     return summary_object
 
 
